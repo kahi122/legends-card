@@ -238,9 +238,15 @@
         // 見つかった組み合わせをすべて表示
         leftMatches.forEach(lIdx => {
           rightMatches.forEach(rIdx => {
+            
+            // ★【追加機能】3枚以上入力されていて、かつ左右両方の位置が特定できている場合、ズレが10より大きければ除外
+            if (inputCount >= 3 && lIdx !== -1 && rIdx !== -1) {
+              if (Math.abs(lIdx - rIdx) > 10) return; 
+            }
+
             matchCount++;
             
-            // 左側のターゲット計算（現在地が分かる場合のみ）
+            // 左側のターゲット計算
             let lTargetIdx = -1, lTargetType = "";
             let lLastIdx = lIdx !== -1 ? (l2 ? lIdx + 1 : lIdx) : -1;
             if (lIdx !== -1) {
