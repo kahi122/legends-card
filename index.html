@@ -6,40 +6,52 @@
   <title>配列 左右ペア検索ツール</title>
   <style>
     body { font-family: sans-serif; background-color: #f9fafb; margin: 0; padding: 12px; color: #374151; }
-    .container { max-width: 600px; margin: 0 auto; }
-    h1 { font-size: 20px; text-align: center; color: #1d4ed8; margin-bottom: 20px; }
-    .input-area { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .input-row { display: flex; gap: 8px; }
-    .input-box { width: 50%; }
-    input { width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+    .container { max-width: 650px; margin: 0 auto; }
+    h1 { font-size: 20px; text-align: center; color: #1d4ed8; margin-bottom: 16px; }
     
-    .result-card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; border: 2px solid #bfdbfe; }
-    .result-header { border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 12px; }
-    .header-top { display: flex; justify-content: space-between; align-items: center; }
-    .badge-col { font-weight: bold; background: #e5e7eb; padding: 4px 12px; border-radius: 99px; font-size: 14px; }
-    .badge-hit { font-weight: 900; color: #2563eb; font-size: 16px; text-shadow: 0px 1px 2px rgba(0,0,0,0.1); }
-    .badge-none { font-weight: bold; color: #ef4444; font-size: 14px; }
+    /* 入力エリアのデザイン */
+    .input-area { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e5e7eb; }
+    .input-desc { font-size: 13px; font-weight: bold; margin-top: 0; margin-bottom: 12px; text-align: center; color: #4b5563; }
+    .input-cylinders { display: flex; gap: 12px; }
+    .cylinder-box { flex: 1; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 8px; padding: 12px; }
+    .cylinder-title { font-size: 14px; font-weight: 900; text-align: center; margin-bottom: 12px; color: #0f172a; border-bottom: 2px solid #cbd5e1; padding-bottom: 4px; }
+    .input-group { margin-bottom: 10px; }
+    .input-group:last-child { margin-bottom: 0; }
+    .input-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
+    input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #fff; transition: all 0.2s; }
+    input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    
+    /* 結果カードのデザイン */
+    .result-card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 24px; border: 2px solid #93c5fd; }
+    .result-header { border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px; }
+    .header-top { display: flex; justify-content: center; align-items: center; margin-bottom: 8px; }
+    .badge-col { font-weight: 900; background: #1e3a8a; color: #fff; padding: 6px 16px; border-radius: 99px; font-size: 15px; box-shadow: 0 2px 4px rgba(30,58,138,0.3); }
+    
+    .target-status { display: flex; justify-content: space-between; gap: 8px; background: #f1f5f9; padding: 8px; border-radius: 8px; }
+    .status-box { flex: 1; text-align: center; font-size: 13px; font-weight: bold; padding: 4px; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
+    .badge-hit { color: #2563eb; font-size: 14px; }
+    .badge-none { color: #94a3b8; font-size: 13px; font-weight: normal; }
 
-    /* 左右シリンダーのレイアウト */
-    .lists-container { display: flex; gap: 8px; }
+    /* 左右シリンダーのリスト */
+    .lists-container { display: flex; gap: 10px; }
     .list-col { flex: 1; min-width: 0; }
-    .list-title { font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 6px; padding: 6px 0; border-radius: 6px; }
-    .list-area { list-style: none; padding: 6px; margin: 0; max-height: 60vh; overflow-y: auto; background: #f3f4f6; border-radius: 8px; border: 1px solid #d1d5db; }
-    .list-item { padding: 6px 8px; margin-bottom: 4px; border-radius: 6px; display: flex; flex-direction: column; font-size: 12px; border: 1px solid #e5e7eb; background: #fff; line-height: 1.4; }
-    .item-text { font-weight: 500; word-break: break-all; }
+    .list-title { font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 6px; padding: 6px 0; border-radius: 6px; background: #e0f2fe; color: #0369a1; }
+    .list-area { list-style: none; padding: 6px; margin: 0; max-height: 55vh; overflow-y: auto; background: #f8fafc; border-radius: 8px; border: 1px solid #cbd5e1; }
+    .list-item { padding: 6px 8px; margin-bottom: 4px; border-radius: 6px; display: flex; flex-direction: column; font-size: 12px; border: 1px solid #e2e8f0; background: #fff; line-height: 1.4; }
+    .item-text { font-weight: bold; word-break: break-all; color: #334155; }
     .label { font-size: 10px; text-align: right; margin-top: 2px; }
 
-    /* --- 色分け設定 --- */
-    /* 検索した場所（青） */
-    .match { background: #dbeafe; color: #1e3a8a; border-color: #3b82f6; font-weight: bold; }
+    /* 色分け設定 */
+    .match { background: #dbeafe; border-color: #3b82f6; box-shadow: inset 0 0 0 1px #3b82f6; }
+    .match .item-text { color: #1e40af; }
     
-    /* LR（赤・オレンジ系） */
-    .target-lr { background: #fee2e2; color: #b91c1c; border-color: #ef4444; font-weight: 900; box-shadow: 0 2px 4px rgba(239,68,68,0.2); }
-    .other-lr { background: #ffedd5; color: #c2410c; border-color: #fdba74; font-weight: bold; }
-
-    /* PR（紫・ピンク系） */
-    .target-pr { background: #f3e8ff; color: #7e22ce; border-color: #a855f7; font-weight: 900; box-shadow: 0 2px 4px rgba(168,85,247,0.2); }
-    .other-pr { background: #fce7f3; color: #be185d; border-color: #f472b6; font-weight: bold; }
+    .target-lr { background: #fee2e2; border-color: #ef4444; box-shadow: inset 0 0 0 1px #ef4444; }
+    .target-lr .item-text { color: #b91c1c; }
+    .other-lr { background: #ffedd5; border-color: #fdba74; }
+    
+    .target-pr { background: #f3e8ff; border-color: #a855f7; box-shadow: inset 0 0 0 1px #a855f7; }
+    .target-pr .item-text { color: #7e22ce; }
+    .other-pr { background: #fce7f3; border-color: #f472b6; }
   </style>
 </head>
 <body>
@@ -48,15 +60,31 @@
     <h1>配列 左右ペア検索ツール</h1>
 
     <div class="input-area">
-      <p style="font-size: 14px; font-weight: bold; margin-top: 0; margin-bottom: 12px;">出た順番に2枚入力してください</p>
-      <div class="input-row">
-        <div class="input-box">
-          <label style="font-size: 12px; color: #6b7280;">1枚目</label>
-          <input type="text" id="card1" list="cards" placeholder="例: パンチホッパー">
+      <p class="input-desc">左右合わせて 2枚以上 入力してください（部分一致OK）</p>
+      
+      <div class="input-cylinders">
+        <div class="cylinder-box">
+          <div class="cylinder-title">左シリンダー (奇数列)</div>
+          <div class="input-group">
+            <label>1枚目</label>
+            <input type="text" id="l1" list="cards" placeholder="例: ゼッツ">
+          </div>
+          <div class="input-group">
+            <label>2枚目 (次に出たカード)</label>
+            <input type="text" id="l2" list="cards">
+          </div>
         </div>
-        <div class="input-box">
-          <label style="font-size: 12px; color: #6b7280;">2枚目</label>
-          <input type="text" id="card2" list="cards" placeholder="例: ドライブ">
+
+        <div class="cylinder-box">
+          <div class="cylinder-title">右シリンダー (偶数列)</div>
+          <div class="input-group">
+            <label>1枚目</label>
+            <input type="text" id="r1" list="cards" placeholder="例: ドライブ">
+          </div>
+          <div class="input-group">
+            <label>2枚目 (次に出たカード)</label>
+            <input type="text" id="r2" list="cards">
+          </div>
         </div>
       </div>
       <datalist id="cards"></datalist>
@@ -66,27 +94,43 @@
   </div>
 
   <script>
-    let cleanCardData = {};
+    let rawData = {};
+    let cylinderPairs = [];
 
-    // 当たり判定の関数
+    // 当たり判定
     function isLR(card) { return card && String(card).includes("LR"); }
     function isPR(card) { return card && String(card).includes("PR"); }
     function isHit(card) { return isLR(card) || isPR(card); }
 
-    // データの読み込み
+    // 文字列の正規化（空白を無視して部分一致させるため）
+    function normalize(str) {
+      if (!str) return "";
+      return String(str).replace(/\s+/g, '').toLowerCase();
+    }
+
+    // データ初期化
     async function init() {
       try {
         const response = await fetch('./data.json');
-        const rawData = await response.json();
-        const uniqueCards = new Set();
+        rawData = await response.json();
         
+        // データのクリーニング（「列目」を削除し、空白をトリム）
+        const cleanData = {};
+        const uniqueCards = new Set();
+
+        let maxCylinderNum = 0;
         for (const [key, list] of Object.entries(rawData)) {
-          cleanCardData[key] = list
+          const num = parseInt(key.replace(/[^\d]/g, ''), 10);
+          if (num > maxCylinderNum) maxCylinderNum = num;
+
+          cleanData[num] = list
             .filter(card => card && !String(card).includes('列目'))
             .map(card => String(card).trim());
-          cleanCardData[key].forEach(card => uniqueCards.add(card));
+          
+          cleanData[num].forEach(card => uniqueCards.add(card));
         }
 
+        // オートコンプリート用のリスト作成
         const datalist = document.getElementById('cards');
         uniqueCards.forEach(card => {
           const option = document.createElement('option');
@@ -94,22 +138,31 @@
           datalist.appendChild(option);
         });
 
-        document.getElementById('results').innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 14px;">カードを2枚入力すると結果が表示されます。</p>';
+        // 左右のペアを作成 (1-2, 3-4, 5-6...)
+        for (let i = 1; i <= maxCylinderNum; i += 2) {
+          cylinderPairs.push({
+            leftNum: i,
+            rightNum: i + 1,
+            leftList: cleanData[i] || [],
+            rightList: cleanData[i + 1] || []
+          });
+        }
+
+        document.getElementById('results').innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">入力待ち...</p>';
       } catch (error) {
         document.getElementById('results').innerHTML = '<p style="color: red; text-align: center;">データの読み込みに失敗しました。</p>';
       }
     }
 
-    // リストのHTMLを作る専用関数
+    // リスト描画用関数
     function renderList(list, matchIdx1, matchIdx2, targetIdx) {
-      if (!list || list.length === 0) return '<li class="list-item">データなし</li>';
+      if (!list || list.length === 0) return '<li class="list-item" style="text-align:center; color:#94a3b8;">データなし</li>';
       
       let html = '';
       list.forEach((card, index) => {
         let className = "list-item";
         let badge = "";
 
-        // 状態に応じた色分けとラベル付け
         if (index === matchIdx1) {
           className += " match"; badge = "🔍 1枚目";
         } else if (index === matchIdx2) {
@@ -133,90 +186,97 @@
       return html;
     }
 
+    // バッジ生成関数
+    function getDistanceBadge(idx, type, lastDrawnIdx) {
+      if (idx !== -1) return `<span class="badge-hit">${type}まで あと ${idx - lastDrawnIdx} 枚</span>`;
+      return `<span class="badge-none">この先に当たりなし</span>`;
+    }
+
     // 検索処理
     function performSearch() {
-      const c1 = document.getElementById('card1').value.trim();
-      const c2 = document.getElementById('card2').value.trim();
+      const l1 = normalize(document.getElementById('l1').value);
+      const l2 = normalize(document.getElementById('l2').value);
+      const r1 = normalize(document.getElementById('r1').value);
+      const r2 = normalize(document.getElementById('r2').value);
+
       const resultsDiv = document.getElementById('results');
 
-      if (!c1 || !c2) {
-        resultsDiv.innerHTML = '<p style="text-align: center; color: #6b7280; font-size: 14px;">カードを2枚入力すると結果が表示されます。</p>';
+      // 入力数の確認（全体で2箇所以上入力されているか）
+      const inputCount = [l1, l2, r1, r2].filter(v => v.length > 0).length;
+      if (inputCount < 2) {
+        resultsDiv.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">左右合わせて 2枚以上 入力すると検索されます。</p>';
         return;
       }
 
       let html = '';
       let matchCount = 0;
 
-      for (const [cylinderName, currentList] of Object.entries(cleanCardData)) {
-        for (let i = 0; i < currentList.length - 1; i++) {
-          if (currentList[i] === c1 && currentList[i + 1] === c2) {
+      // 各シリンダーペアを走査
+      cylinderPairs.forEach(pair => {
+        const maxLen = Math.max(pair.leftList.length, pair.rightList.length);
+        
+        for (let i = 0; i < maxLen - 1; i++) {
+          const cL1 = pair.leftList[i] ? normalize(pair.leftList[i]) : "";
+          const cL2 = pair.leftList[i+1] ? normalize(pair.leftList[i+1]) : "";
+          const cR1 = pair.rightList[i] ? normalize(pair.rightList[i]) : "";
+          const cR2 = pair.rightList[i+1] ? normalize(pair.rightList[i+1]) : "";
+
+          // 部分一致の判定（入力がある箇所のみチェック）
+          let isMatch = true;
+          if (l1 && !cL1.includes(l1)) isMatch = false;
+          if (l2 && !cL2.includes(l2)) isMatch = false;
+          if (r1 && !cR1.includes(r1)) isMatch = false;
+          if (r2 && !cR2.includes(r2)) isMatch = false;
+
+          if (isMatch) {
             matchCount++;
             
-            // 次の当たり（LR or PR）を探す
-            let targetIndex = -1;
-            let targetType = "";
-            for (let j = i + 2; j < currentList.length; j++) {
-              if (isHit(currentList[j])) {
-                targetIndex = j;
-                targetType = isLR(currentList[j]) ? "LR" : "PR";
+            // どこまでカードを引いたか（検索の深さ）を計算
+            const searchDepth = (l2 || r2) ? 2 : 1;
+            const lastDrawnIdx = i + searchDepth - 1; // 最後に引いたカードのインデックス
+            const targetSearchStartIdx = i + searchDepth; // 次のターゲットを探し始めるインデックス
+
+            // 左シリンダーの次の当たりを探す
+            let leftTargetIdx = -1, leftTargetType = "";
+            for (let j = targetSearchStartIdx; j < pair.leftList.length; j++) {
+              if (isHit(pair.leftList[j])) {
+                leftTargetIdx = j;
+                leftTargetType = isLR(pair.leftList[j]) ? "LR" : "PR";
                 break;
               }
             }
 
-            // 列の番号を取得（例: "cylinder_2" から 2 を取り出す）
-            const matchNum = parseInt(cylinderName.replace(/[^\d]/g, ''), 10) || 0;
-            let leftNum, rightNum, leftList, rightList, isLeftMatched;
-
-            if (matchNum > 0) {
-              // 奇数なら左、偶数なら右と判定
-              isLeftMatched = (matchNum % 2 !== 0);
-              leftNum = isLeftMatched ? matchNum : matchNum - 1;
-              rightNum = isLeftMatched ? matchNum + 1 : matchNum;
-
-              // ペアのリストを取得する
-              const findListByNum = (num) => {
-                for (const [k, v] of Object.entries(cleanCardData)) {
-                  if (parseInt(k.replace(/[^\d]/g, ''), 10) === num) return v;
-                }
-                return [];
-              };
-              leftList = findListByNum(leftNum);
-              rightList = findListByNum(rightNum);
-            } else {
-              // 番号がない場合は単独表示
-              isLeftMatched = true;
-              leftNum = "?"; rightNum = "?";
-              leftList = currentList; rightList = [];
+            // 右シリンダーの次の当たりを探す
+            let rightTargetIdx = -1, rightTargetType = "";
+            for (let j = targetSearchStartIdx; j < pair.rightList.length; j++) {
+              if (isHit(pair.rightList[j])) {
+                rightTargetIdx = j;
+                rightTargetType = isLR(pair.rightList[j]) ? "LR" : "PR";
+                break;
+              }
             }
 
-            // 左右のHTMLを生成（検索ヒットしていない側はハイライトしない）
-            const leftHtml = renderList(leftList, isLeftMatched ? i : -1, isLeftMatched ? i+1 : -1, isLeftMatched ? targetIndex : -1);
-            const rightHtml = renderList(rightList, !isLeftMatched ? i : -1, !isLeftMatched ? i+1 : -1, !isLeftMatched ? targetIndex : -1);
+            const leftHtml = renderList(pair.leftList, l1 ? i : -1, l2 ? i+1 : -1, leftTargetIdx);
+            const rightHtml = renderList(pair.rightList, r1 ? i : -1, r2 ? i+1 : -1, rightTargetIdx);
 
-            const distanceText = targetIndex !== -1 
-              ? `<span class="badge-hit">${targetType}まで あと ${targetIndex - (i + 1)} 枚</span>` 
-              : `<span class="badge-none">この先に当たりなし</span>`;
-
-            // 結果カードの組み立て
             html += `
               <div class="result-card">
                 <div class="result-header">
                   <div class="header-top">
-                    <span class="badge-col">検索ヒット: 列 ${matchNum}</span>
-                    ${distanceText}
+                    <span class="badge-col">検索ヒット: 列 ${pair.leftNum} & ${pair.rightNum}</span>
+                  </div>
+                  <div class="target-status">
+                    <div class="status-box">左: ${getDistanceBadge(leftTargetIdx, leftTargetType, lastDrawnIdx)}</div>
+                    <div class="status-box">右: ${getDistanceBadge(rightTargetIdx, rightTargetType, lastDrawnIdx)}</div>
                   </div>
                 </div>
                 <div class="lists-container">
                   <div class="list-col">
-                    <div class="list-title" style="background: ${isLeftMatched ? '#dbeafe' : '#f3f4f6'}; color: ${isLeftMatched ? '#1e3a8a' : '#4b5563'};">
-                      左シリンダー (列 ${leftNum})
-                    </div>
+                    <div class="list-title">左 (列 ${pair.leftNum})</div>
                     <ul class="list-area">${leftHtml}</ul>
                   </div>
                   <div class="list-col">
-                    <div class="list-title" style="background: ${!isLeftMatched ? '#dbeafe' : '#f3f4f6'}; color: ${!isLeftMatched ? '#1e3a8a' : '#4b5563'};">
-                      右シリンダー (列 ${rightNum})
-                    </div>
+                    <div class="list-title">右 (列 ${pair.rightNum})</div>
                     <ul class="list-area">${rightHtml}</ul>
                   </div>
                 </div>
@@ -224,7 +284,7 @@
             `;
           }
         }
-      }
+      });
 
       if (matchCount === 0) {
         resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-weight: bold; background: #fef2f2; padding: 16px; border-radius: 8px;">その並びは見つかりませんでした。</p>';
@@ -233,8 +293,11 @@
       }
     }
 
-    document.getElementById('card1').addEventListener('input', performSearch);
-    document.getElementById('card2').addEventListener('input', performSearch);
+    // すべての入力欄にイベントリスナーを設定
+    ['l1', 'l2', 'r1', 'r2'].forEach(id => {
+      document.getElementById(id).addEventListener('input', performSearch);
+    });
+
     init();
   </script>
 </body>
