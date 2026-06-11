@@ -30,7 +30,7 @@
     .target-status { display: flex; justify-content: space-between; gap: 8px; background: #f1f5f9; padding: 8px; border-radius: 8px; }
     .status-box { flex: 1; text-align: center; font-size: 13px; font-weight: bold; padding: 4px; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
     .badge-hit { color: #2563eb; font-size: 14px; }
-    .badge-none { color: #94a3b8; font-size: 13px; font-weight: normal; }
+    .badge-none { color: #94a3b8; font-size: 12px; font-weight: normal; }
 
     /* 左右シリンダーのリスト */
     .lists-container { display: flex; gap: 10px; }
@@ -102,7 +102,7 @@
     function isPR(card) { return card && String(card).includes("PR"); }
     function isHit(card) { return isLR(card) || isPR(card); }
 
-    // 文字列の正規化（空白を無視して部分一致させるため）
+    // 文字列の正規化（空白を無視して部分一致）
     function normalize(str) {
       if (!str) return "";
       return String(str).replace(/\s+/g, '').toLowerCase();
@@ -114,11 +114,10 @@
         const response = await fetch('./data.json');
         rawData = await response.json();
         
-        // データのクリーニング（「列目」を削除し、空白をトリム）
         const cleanData = {};
         const uniqueCards = new Set();
-
         let maxCylinderNum = 0;
+
         for (const [key, list] of Object.entries(rawData)) {
           const num = parseInt(key.replace(/[^\d]/g, ''), 10);
           if (num > maxCylinderNum) maxCylinderNum = num;
@@ -130,7 +129,6 @@
           cleanData[num].forEach(card => uniqueCards.add(card));
         }
 
-        // オートコンプリート用のリスト作成
         const datalist = document.getElementById('cards');
         uniqueCards.forEach(card => {
           const option = document.createElement('option');
@@ -138,7 +136,7 @@
           datalist.appendChild(option);
         });
 
-        // 左右のペアを作成 (1-2, 3-4, 5-6...)
+        // 左右のペアを作成 (1-2, 3-4...)
         for (let i = 1; i <= maxCylinderNum; i += 2) {
           cylinderPairs.push({
             leftNum: i,
@@ -201,7 +199,7 @@
 
       const resultsDiv = document.getElementById('results');
 
-      // 入力数の確認（全体で2箇所以上入力されているか）
+      // 入力数の確認
       const inputCount = [l1, l2, r1, r2].filter(v => v.length > 0).length;
       if (inputCount < 2) {
         resultsDiv.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">左右合わせて 2枚以上 入力すると検索されます。</p>';
@@ -211,53 +209,64 @@
       let html = '';
       let matchCount = 0;
 
-      // 各シリンダーペアを走査
+      // 指定したシリンダー内でのマッチ箇所を探す関数
+      function getMatches(list, i1, i2) {
+        if (!i1 && !i2) return [-1]; // 入力がない場合はスキップ用フラグ
+        let res = [];
+        for (let i = 0; i < list.length; i++) {
+          let m1 = true, m2 = true;
+          if (i1) {
+            if (!list[i] || !normalize(list[i]).includes(i1)) m1 = false;
+          }
+          if (i2) {
+            if (i + 1 >= list.length || !list[i+1] || !normalize(list[i+1]).includes(i2)) m2 = false;
+          }
+          if (m1 && m2) res.push(i);
+        }
+        return res;
+      }
+
       cylinderPairs.forEach(pair => {
-        const maxLen = Math.max(pair.leftList.length, pair.rightList.length);
-        
-        for (let i = 0; i < maxLen - 1; i++) {
-          const cL1 = pair.leftList[i] ? normalize(pair.leftList[i]) : "";
-          const cL2 = pair.leftList[i+1] ? normalize(pair.leftList[i+1]) : "";
-          const cR1 = pair.rightList[i] ? normalize(pair.rightList[i]) : "";
-          const cR2 = pair.rightList[i+1] ? normalize(pair.rightList[i+1]) : "";
+        // 左右それぞれのシリンダーで独立して検索
+        const leftMatches = getMatches(pair.leftList, l1, l2);
+        const rightMatches = getMatches(pair.rightList, r1, r2);
 
-          // 部分一致の判定（入力がある箇所のみチェック）
-          let isMatch = true;
-          if (l1 && !cL1.includes(l1)) isMatch = false;
-          if (l2 && !cL2.includes(l2)) isMatch = false;
-          if (r1 && !cR1.includes(r1)) isMatch = false;
-          if (r2 && !cR2.includes(r2)) isMatch = false;
+        // 片方でも入力があるのにマッチしなかった場合は、このペアはハズレ
+        if ((l1 || l2) && leftMatches.length === 0) return;
+        if ((r1 || r2) && rightMatches.length === 0) return;
 
-          if (isMatch) {
+        // 見つかった組み合わせをすべて表示
+        leftMatches.forEach(lIdx => {
+          rightMatches.forEach(rIdx => {
             matchCount++;
             
-            // どこまでカードを引いたか（検索の深さ）を計算
-            const searchDepth = (l2 || r2) ? 2 : 1;
-            const lastDrawnIdx = i + searchDepth - 1; // 最後に引いたカードのインデックス
-            const targetSearchStartIdx = i + searchDepth; // 次のターゲットを探し始めるインデックス
-
-            // 左シリンダーの次の当たりを探す
-            let leftTargetIdx = -1, leftTargetType = "";
-            for (let j = targetSearchStartIdx; j < pair.leftList.length; j++) {
-              if (isHit(pair.leftList[j])) {
-                leftTargetIdx = j;
-                leftTargetType = isLR(pair.leftList[j]) ? "LR" : "PR";
-                break;
+            // 左側のターゲット計算（現在地が分かる場合のみ）
+            let lTargetIdx = -1, lTargetType = "";
+            let lLastIdx = lIdx !== -1 ? (l2 ? lIdx + 1 : lIdx) : -1;
+            if (lIdx !== -1) {
+              for (let j = lLastIdx + 1; j < pair.leftList.length; j++) {
+                if (isHit(pair.leftList[j])) {
+                  lTargetIdx = j; lTargetType = isLR(pair.leftList[j]) ? "LR" : "PR"; break;
+                }
               }
             }
 
-            // 右シリンダーの次の当たりを探す
-            let rightTargetIdx = -1, rightTargetType = "";
-            for (let j = targetSearchStartIdx; j < pair.rightList.length; j++) {
-              if (isHit(pair.rightList[j])) {
-                rightTargetIdx = j;
-                rightTargetType = isLR(pair.rightList[j]) ? "LR" : "PR";
-                break;
+            // 右側のターゲット計算
+            let rTargetIdx = -1, rTargetType = "";
+            let rLastIdx = rIdx !== -1 ? (r2 ? rIdx + 1 : rIdx) : -1;
+            if (rIdx !== -1) {
+              for (let j = rLastIdx + 1; j < pair.rightList.length; j++) {
+                if (isHit(pair.rightList[j])) {
+                  rTargetIdx = j; rTargetType = isLR(pair.rightList[j]) ? "LR" : "PR"; break;
+                }
               }
             }
 
-            const leftHtml = renderList(pair.leftList, l1 ? i : -1, l2 ? i+1 : -1, leftTargetIdx);
-            const rightHtml = renderList(pair.rightList, r1 ? i : -1, r2 ? i+1 : -1, rightTargetIdx);
+            const leftHtml = renderList(pair.leftList, lIdx, l2 ? lIdx+1 : -1, lTargetIdx);
+            const rightHtml = renderList(pair.rightList, rIdx, r2 ? rIdx+1 : -1, rTargetIdx);
+
+            const lBadge = lIdx !== -1 ? getDistanceBadge(lTargetIdx, lTargetType, lLastIdx) : '<span class="badge-none">入力なし（現在地不明）</span>';
+            const rBadge = rIdx !== -1 ? getDistanceBadge(rTargetIdx, rTargetType, rLastIdx) : '<span class="badge-none">入力なし（現在地不明）</span>';
 
             html += `
               <div class="result-card">
@@ -266,8 +275,8 @@
                     <span class="badge-col">検索ヒット: 列 ${pair.leftNum} & ${pair.rightNum}</span>
                   </div>
                   <div class="target-status">
-                    <div class="status-box">左: ${getDistanceBadge(leftTargetIdx, leftTargetType, lastDrawnIdx)}</div>
-                    <div class="status-box">右: ${getDistanceBadge(rightTargetIdx, rightTargetType, lastDrawnIdx)}</div>
+                    <div class="status-box">左: ${lBadge}</div>
+                    <div class="status-box">右: ${rBadge}</div>
                   </div>
                 </div>
                 <div class="lists-container">
@@ -282,18 +291,25 @@
                 </div>
               </div>
             `;
-          }
-        }
+          });
+        });
       });
 
       if (matchCount === 0) {
         resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-weight: bold; background: #fef2f2; padding: 16px; border-radius: 8px;">その並びは見つかりませんでした。</p>';
       } else {
         resultsDiv.innerHTML = html;
+        
+        // 検索結果が出たら、自動で一番最初のヒット箇所までスクロールする
+        setTimeout(() => {
+          const firstMatch = document.querySelector('.match');
+          if (firstMatch) {
+            firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 50);
       }
     }
 
-    // すべての入力欄にイベントリスナーを設定
     ['l1', 'l2', 'r1', 'r2'].forEach(id => {
       document.getElementById(id).addEventListener('input', performSearch);
     });
