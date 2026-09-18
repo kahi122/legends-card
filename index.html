@@ -18,8 +18,10 @@
     .input-group { margin-bottom: 10px; }
     .input-group:last-child { margin-bottom: 0; }
     .input-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
-    input { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #fff; transition: all 0.2s; }
-    input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+    
+    /* 入力欄（プルダウン）のデザイン */
+    select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #fff; transition: all 0.2s; cursor: pointer; }
+    select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
     
     /* 結果カードのデザイン */
     .result-card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 24px; border: 2px solid #93c5fd; }
@@ -72,18 +74,23 @@
     <h1>配列 左右ペア検索ツール</h1>
 
     <div class="input-area">
-      <p class="input-desc">左右合わせて 2枚以上 入力してください（部分一致OK）</p>
+      <p class="input-desc">左右合わせて 2枚以上 選択してください</p>
       
       <div class="input-cylinders">
         <div class="cylinder-box">
           <div class="cylinder-title">左シリンダー (奇数列)</div>
           <div class="input-group">
             <label>1枚目</label>
-            <input type="text" id="l1" list="cards" placeholder="例: ゼッツ">
+            <!-- ★input から select に変更 -->
+            <select id="l1">
+              <option value="">未選択</option>
+            </select>
           </div>
           <div class="input-group">
             <label>2枚目 (次に出たカード)</label>
-            <input type="text" id="l2" list="cards">
+            <select id="l2">
+              <option value="">未選択</option>
+            </select>
           </div>
         </div>
 
@@ -91,15 +98,18 @@
           <div class="cylinder-title">右シリンダー (偶数列)</div>
           <div class="input-group">
             <label>1枚目</label>
-            <input type="text" id="r1" list="cards" placeholder="例: ドライブ">
+            <select id="r1">
+              <option value="">未選択</option>
+            </select>
           </div>
           <div class="input-group">
             <label>2枚目 (次に出たカード)</label>
-            <input type="text" id="r2" list="cards">
+            <select id="r2">
+              <option value="">未選択</option>
+            </select>
           </div>
         </div>
       </div>
-      <datalist id="cards"></datalist>
     </div>
 
     <div id="results"></div>
@@ -109,7 +119,7 @@
     let rawData = {};
     let cylinderPairs = [];
 
-    // ★カードのレアリティ判定（複合文字を先に判定する）
+    // カードのレアリティ判定（複合文字を先に判定する）
     function getHitType(card) {
       if (!card) return null;
       let str = String(card).toUpperCase();
@@ -152,16 +162,25 @@
           
           cleanData[num].forEach(card => uniqueCards.add(card));
         }
-
-        const datalist = document.getElementById('cards');
         
-        // ★候補リストをあいうえお順（日本語の順序）にソートして追加
+        // ★候補リストをあいうえお順（日本語の順序）にソート
         const sortedCards = Array.from(uniqueCards).sort((a, b) => a.localeCompare(b, 'ja'));
         
+        // ★全てのセレクトボックス(プルダウン)に選択肢を追加
+        const selects = [
+          document.getElementById('l1'),
+          document.getElementById('l2'),
+          document.getElementById('r1'),
+          document.getElementById('r2')
+        ];
+
         sortedCards.forEach(card => {
-          const option = document.createElement('option');
-          option.value = card;
-          datalist.appendChild(option);
+          selects.forEach(select => {
+            const option = document.createElement('option');
+            option.value = card;
+            option.textContent = card; // プルダウンの表示名
+            select.appendChild(option);
+          });
         });
 
         // 左右のペアを作成 (1-2, 3-4...)
@@ -232,7 +251,7 @@
       // 入力数の確認
       const inputCount = [l1, l2, r1, r2].filter(v => v.length > 0).length;
       if (inputCount < 2) {
-        resultsDiv.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">左右合わせて 2枚以上 入力すると検索されます。</p>';
+        resultsDiv.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">左右合わせて 2枚以上 選択すると検索されます。</p>';
         return;
       }
 
@@ -269,7 +288,7 @@
         leftMatches.forEach(lIdx => {
           rightMatches.forEach(rIdx => {
             
-            // ★左右両方の位置が特定できている場合、ズレが10より大きければ除外
+            // 左右両方の位置が特定できている場合、ズレが10より大きければ除外
             if (lIdx !== -1 && rIdx !== -1) {
               if (Math.abs(lIdx - rIdx) > 10) return; 
             }
@@ -305,8 +324,8 @@
             const leftHtml = renderList(pair.leftList, lIdx, l2 ? lIdx+1 : -1, lTargetIdx);
             const rightHtml = renderList(pair.rightList, rIdx, r2 ? rIdx+1 : -1, rTargetIdx);
 
-            const lBadge = lIdx !== -1 ? getDistanceBadge(lTargetIdx, lTargetType, lLastIdx) : '<span class="badge-none">入力なし（現在地不明）</span>';
-            const rBadge = rIdx !== -1 ? getDistanceBadge(rTargetIdx, rTargetType, rLastIdx) : '<span class="badge-none">入力なし（現在地不明）</span>';
+            const lBadge = lIdx !== -1 ? getDistanceBadge(lTargetIdx, lTargetType, lLastIdx) : '<span class="badge-none">選択なし（現在地不明）</span>';
+            const rBadge = rIdx !== -1 ? getDistanceBadge(rTargetIdx, rTargetType, rLastIdx) : '<span class="badge-none">選択なし（現在地不明）</span>';
 
             html += `
               <div class="result-card">
@@ -339,12 +358,13 @@
         resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-weight: bold; background: #fef2f2; padding: 16px; border-radius: 8px;">その並びは見つかりませんでした。</p>';
       } else {
         resultsDiv.innerHTML = html;
-        // ★自動スクロールの処理を削除しました
+        // 自動スクロールは無効化済み
       }
     }
 
+    // ★イベントを input から change に変更 (セレクトボックス用)
     ['l1', 'l2', 'r1', 'r2'].forEach(id => {
-      document.getElementById(id).addEventListener('input', performSearch);
+      document.getElementById(id).addEventListener('change', performSearch);
     });
 
     init();
