@@ -41,17 +41,29 @@
     .item-text { font-weight: bold; word-break: break-all; color: #334155; }
     .label { font-size: 10px; text-align: right; margin-top: 2px; }
 
-    /* 色分け設定 */
+    /* --- 色分け設定 --- */
     .match { background: #dbeafe; border-color: #3b82f6; box-shadow: inset 0 0 0 1px #3b82f6; }
     .match .item-text { color: #1e40af; }
     
+    /* LR (赤系) */
     .target-lr { background: #fee2e2; border-color: #ef4444; box-shadow: inset 0 0 0 1px #ef4444; }
     .target-lr .item-text { color: #b91c1c; }
-    .other-lr { background: #ffedd5; border-color: #fdba74; }
+    .other-lr { background: #fef2f2; border-color: #fca5a5; }
     
-    .target-pr { background: #f3e8ff; border-color: #a855f7; box-shadow: inset 0 0 0 1px #a855f7; }
-    .target-pr .item-text { color: #7e22ce; }
-    .other-pr { background: #fce7f3; border-color: #f472b6; }
+    /* LRPR (金・黄系) */
+    .target-lrpr { background: #fef08a; border-color: #eab308; box-shadow: inset 0 0 0 1px #eab308; }
+    .target-lrpr .item-text { color: #a16207; }
+    .other-lrpr { background: #fef9c3; border-color: #fde047; }
+    
+    /* SRPR (紫系) */
+    .target-srpr { background: #f3e8ff; border-color: #a855f7; box-shadow: inset 0 0 0 1px #a855f7; }
+    .target-srpr .item-text { color: #7e22ce; }
+    .other-srpr { background: #faf5ff; border-color: #d8b4fe; }
+
+    /* PR (ピンク系・その他のPRがある場合) */
+    .target-pr { background: #fce7f3; border-color: #ec4899; box-shadow: inset 0 0 0 1px #ec4899; }
+    .target-pr .item-text { color: #be185d; }
+    .other-pr { background: #fdf2f8; border-color: #fbcfe8; }
   </style>
 </head>
 <body>
@@ -97,10 +109,22 @@
     let rawData = {};
     let cylinderPairs = [];
 
-    // 当たり判定
-    function isLR(card) { return card && String(card).includes("LR"); }
-    function isPR(card) { return card && String(card).includes("PR"); }
-    function isHit(card) { return isLR(card) || isPR(card); }
+    // ★カードのレアリティ判定（複合文字を先に判定する）
+    function getHitType(card) {
+      if (!card) return null;
+      let str = String(card).toUpperCase();
+      
+      if (str.includes("LRPR")) return "LRPR";
+      if (str.includes("SRPR")) return "SRPR";
+      if (str.includes("LR")) return "LR";
+      if (str.includes("PR")) return "PR";
+      
+      return null;
+    }
+
+    function isHit(card) { 
+      return getHitType(card) !== null; 
+    }
 
     // 文字列の正規化（空白を無視して部分一致）
     function normalize(str) {
@@ -160,18 +184,20 @@
       list.forEach((card, index) => {
         let className = "list-item";
         let badge = "";
+        let hitType = getHitType(card); // カードのレアリティを取得
 
         if (index === matchIdx1) {
           className += " match"; badge = "🔍 1枚目";
         } else if (index === matchIdx2) {
           className += " match"; badge = "🔍 2枚目";
-        } else if (index === targetIdx) {
-          className += isLR(card) ? " target-lr" : " target-pr";
-          badge = isLR(card) ? "🎯 次のLR！" : "🎯 次のPR！";
-        } else if (isLR(card)) {
-          className += " other-lr"; badge = "LR";
-        } else if (isPR(card)) {
-          className += " other-pr"; badge = "PR";
+        } else if (index === targetIdx && hitType) {
+          // ターゲットの場合
+          className += " target-" + hitType.toLowerCase();
+          badge = `🎯 次の${hitType}！`;
+        } else if (hitType) {
+          // ターゲット以外の当たりカードの場合
+          className += " other-" + hitType.toLowerCase(); 
+          badge = hitType;
         }
 
         html += `
@@ -239,8 +265,8 @@
         leftMatches.forEach(lIdx => {
           rightMatches.forEach(rIdx => {
             
-            // ★【追加機能】3枚以上入力されていて、かつ左右両方の位置が特定できている場合、ズレが10より大きければ除外
-            if (inputCount >= 3 && lIdx !== -1 && rIdx !== -1) {
+            // ★左右両方の位置が特定できている場合、ズレが10より大きければ除外
+            if (lIdx !== -1 && rIdx !== -1) {
               if (Math.abs(lIdx - rIdx) > 10) return; 
             }
 
@@ -252,7 +278,9 @@
             if (lIdx !== -1) {
               for (let j = lLastIdx + 1; j < pair.leftList.length; j++) {
                 if (isHit(pair.leftList[j])) {
-                  lTargetIdx = j; lTargetType = isLR(pair.leftList[j]) ? "LR" : "PR"; break;
+                  lTargetIdx = j; 
+                  lTargetType = getHitType(pair.leftList[j]); 
+                  break;
                 }
               }
             }
@@ -263,7 +291,9 @@
             if (rIdx !== -1) {
               for (let j = rLastIdx + 1; j < pair.rightList.length; j++) {
                 if (isHit(pair.rightList[j])) {
-                  rTargetIdx = j; rTargetType = isLR(pair.rightList[j]) ? "LR" : "PR"; break;
+                  rTargetIdx = j; 
+                  rTargetType = getHitType(pair.rightList[j]); 
+                  break;
                 }
               }
             }
