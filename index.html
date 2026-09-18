@@ -154,7 +154,11 @@
         }
 
         const datalist = document.getElementById('cards');
-        uniqueCards.forEach(card => {
+        
+        // ★候補リストをあいうえお順（日本語の順序）にソートして追加
+        const sortedCards = Array.from(uniqueCards).sort((a, b) => a.localeCompare(b, 'ja'));
+        
+        sortedCards.forEach(card => {
           const option = document.createElement('option');
           option.value = card;
           datalist.appendChild(option);
@@ -335,14 +339,7 @@
         resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-weight: bold; background: #fef2f2; padding: 16px; border-radius: 8px;">その並びは見つかりませんでした。</p>';
       } else {
         resultsDiv.innerHTML = html;
-        
-        // 検索結果が出たら、自動で一番最初のヒット箇所までスクロールする
-        setTimeout(() => {
-          const firstMatch = document.querySelector('.match');
-          if (firstMatch) {
-            firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }, 50);
+        // ★自動スクロールの処理を削除しました
       }
     }
 
