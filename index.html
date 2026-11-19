@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -8,8 +9,7 @@
     body { font-family: sans-serif; background-color: #f9fafb; margin: 0; padding: 12px; color: #374151; }
     .container { max-width: 650px; margin: 0 auto; }
     h1 { font-size: 20px; text-align: center; color: #1d4ed8; margin-bottom: 16px; }
-    
-    /* 入力エリアのデザイン */
+
     .input-area { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e5e7eb; }
     .input-desc { font-size: 13px; font-weight: bold; margin-top: 0; margin-bottom: 12px; text-align: center; color: #4b5563; }
     .input-cylinders { display: flex; gap: 12px; }
@@ -18,23 +18,20 @@
     .input-group { margin-bottom: 10px; }
     .input-group:last-child { margin-bottom: 0; }
     .input-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: bold; }
-    
-    /* 入力欄（プルダウン）のデザイン */
+
     select { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #fff; transition: all 0.2s; cursor: pointer; }
     select:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-    
-    /* 結果カードのデザイン */
+
     .result-card { background: #fff; padding: 16px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 24px; border: 2px solid #93c5fd; }
     .result-header { border-bottom: 1px dashed #cbd5e1; padding-bottom: 12px; margin-bottom: 12px; }
     .header-top { display: flex; justify-content: center; align-items: center; margin-bottom: 8px; }
     .badge-col { font-weight: 900; background: #1e3a8a; color: #fff; padding: 6px 16px; border-radius: 99px; font-size: 15px; box-shadow: 0 2px 4px rgba(30,58,138,0.3); }
-    
+
     .target-status { display: flex; justify-content: space-between; gap: 8px; background: #f1f5f9; padding: 8px; border-radius: 8px; }
     .status-box { flex: 1; text-align: center; font-size: 13px; font-weight: bold; padding: 4px; border-radius: 6px; background: #fff; border: 1px solid #e2e8f0; }
     .badge-hit { color: #2563eb; font-size: 14px; }
     .badge-none { color: #94a3b8; font-size: 12px; font-weight: normal; }
 
-    /* 左右シリンダーのリスト */
     .lists-container { display: flex; gap: 10px; }
     .list-col { flex: 1; min-width: 0; }
     .list-title { font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 6px; padding: 6px 0; border-radius: 6px; background: #e0f2fe; color: #0369a1; }
@@ -43,26 +40,21 @@
     .item-text { font-weight: bold; word-break: break-all; color: #334155; }
     .label { font-size: 10px; text-align: right; margin-top: 2px; }
 
-    /* --- 色分け設定 --- */
     .match { background: #dbeafe; border-color: #3b82f6; box-shadow: inset 0 0 0 1px #3b82f6; }
     .match .item-text { color: #1e40af; }
-    
-    /* LR (赤系) */
+
     .target-lr { background: #fee2e2; border-color: #ef4444; box-shadow: inset 0 0 0 1px #ef4444; }
     .target-lr .item-text { color: #b91c1c; }
     .other-lr { background: #fef2f2; border-color: #fca5a5; }
-    
-    /* LRPR (金・黄系) */
+
     .target-lrpr { background: #fef08a; border-color: #eab308; box-shadow: inset 0 0 0 1px #eab308; }
     .target-lrpr .item-text { color: #a16207; }
     .other-lrpr { background: #fef9c3; border-color: #fde047; }
-    
-    /* SRPR (紫系) */
+
     .target-srpr { background: #f3e8ff; border-color: #a855f7; box-shadow: inset 0 0 0 1px #a855f7; }
     .target-srpr .item-text { color: #7e22ce; }
     .other-srpr { background: #faf5ff; border-color: #d8b4fe; }
 
-    /* PR (ピンク系・その他のPRがある場合) */
     .target-pr { background: #fce7f3; border-color: #ec4899; box-shadow: inset 0 0 0 1px #ec4899; }
     .target-pr .item-text { color: #be185d; }
     .other-pr { background: #fdf2f8; border-color: #fbcfe8; }
@@ -74,14 +66,24 @@
     <h1>配列 左右ペア検索ツール</h1>
 
     <div class="input-area">
+
+      <!-- 弾数選択 -->
+      <div class="input-group" style="margin-bottom: 16px;">
+        <label for="seriesSelect">弾数</label>
+        <select id="seriesSelect">
+          <option value="3">VR3弾</option>
+          <option value="4">VR4弾</option>
+          <option value="5">VR5弾</option>
+        </select>
+      </div>
+
       <p class="input-desc">左右合わせて 2枚以上 選択してください</p>
-      
+
       <div class="input-cylinders">
         <div class="cylinder-box">
           <div class="cylinder-title">左シリンダー (奇数列)</div>
           <div class="input-group">
             <label>1枚目</label>
-            <!-- ★input から select に変更 -->
             <select id="l1">
               <option value="">未選択</option>
             </select>
@@ -118,22 +120,23 @@
   <script>
     let rawData = {};
     let cylinderPairs = [];
+    let currentSeries = "3";
 
     // カードのレアリティ判定（複合文字を先に判定する）
     function getHitType(card) {
       if (!card) return null;
       let str = String(card).toUpperCase();
-      
+
       if (str.includes("LRPR")) return "LRPR";
       if (str.includes("SRPR")) return "SRPR";
       if (str.includes("LR")) return "LR";
       if (str.includes("PR")) return "PR";
-      
+
       return null;
     }
 
-    function isHit(card) { 
-      return getHitType(card) !== null; 
+    function isHit(card) {
+      return getHitType(card) !== null;
     }
 
     // 文字列の正規化（空白を無視して部分一致）
@@ -145,9 +148,14 @@
     // データ初期化
     async function init() {
       try {
-        const response = await fetch('./data.json');
+        const response = await fetch(`./data_vr${currentSeries}.json`);
+
+        if (!response.ok) {
+          throw new Error(`data_vr${currentSeries}.json の読み込みに失敗しました`);
+        }
+
         rawData = await response.json();
-        
+
         const cleanData = {};
         const uniqueCards = new Set();
         let maxCylinderNum = 0;
@@ -159,14 +167,14 @@
           cleanData[num] = list
             .filter(card => card && !String(card).includes('列目'))
             .map(card => String(card).trim());
-          
+
           cleanData[num].forEach(card => uniqueCards.add(card));
         }
-        
-        // ★候補リストをあいうえお順（日本語の順序）にソート
+
+        // 候補リストをあいうえお順にソート
         const sortedCards = Array.from(uniqueCards).sort((a, b) => a.localeCompare(b, 'ja'));
-        
-        // ★全てのセレクトボックス(プルダウン)に選択肢を追加
+
+        // セレクトボックスの選択肢を初期化
         const selects = [
           document.getElementById('l1'),
           document.getElementById('l2'),
@@ -174,16 +182,22 @@
           document.getElementById('r2')
         ];
 
+        selects.forEach(select => {
+          select.innerHTML = '<option value="">未選択</option>';
+        });
+
         sortedCards.forEach(card => {
           selects.forEach(select => {
             const option = document.createElement('option');
             option.value = card;
-            option.textContent = card; // プルダウンの表示名
+            option.textContent = card;
             select.appendChild(option);
           });
         });
 
         // 左右のペアを作成 (1-2, 3-4...)
+        cylinderPairs = [];
+
         for (let i = 1; i <= maxCylinderNum; i += 2) {
           cylinderPairs.push({
             leftNum: i,
@@ -193,49 +207,60 @@
           });
         }
 
-        document.getElementById('results').innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">入力待ち...</p>';
+        document.getElementById('results').innerHTML =
+          '<p style="text-align: center; color: #64748b; font-size: 14px;">入力待ち...</p>';
+
       } catch (error) {
-        document.getElementById('results').innerHTML = '<p style="color: red; text-align: center;">データの読み込みに失敗しました。</p>';
+        console.error(error);
+        document.getElementById('results').innerHTML =
+          `<p style="color: red; text-align: center;">VR${currentSeries}弾のデータ読み込みに失敗しました。data_vr${currentSeries}.json の配置を確認してください。</p>`;
       }
     }
 
     // リスト描画用関数
     function renderList(list, matchIdx1, matchIdx2, targetIdx) {
-      if (!list || list.length === 0) return '<li class="list-item" style="text-align:center; color:#94a3b8;">データなし</li>';
-      
+      if (!list || list.length === 0) {
+        return '<li class="list-item" style="text-align:center; color:#94a3b8;">データなし</li>';
+      }
+
       let html = '';
+
       list.forEach((card, index) => {
         let className = "list-item";
         let badge = "";
-        let hitType = getHitType(card); // カードのレアリティを取得
+        let hitType = getHitType(card);
 
         if (index === matchIdx1) {
-          className += " match"; badge = "🔍 1枚目";
+          className += " match";
+          badge = "🔍 1枚目";
         } else if (index === matchIdx2) {
-          className += " match"; badge = "🔍 2枚目";
+          className += " match";
+          badge = "🔍 2枚目";
         } else if (index === targetIdx && hitType) {
-          // ターゲットの場合
           className += " target-" + hitType.toLowerCase();
           badge = `🎯 次の${hitType}！`;
         } else if (hitType) {
-          // ターゲット以外の当たりカードの場合
-          className += " other-" + hitType.toLowerCase(); 
+          className += " other-" + hitType.toLowerCase();
           badge = hitType;
         }
 
         html += `
           <li class="${className}">
-            <span class="item-text"><span style="color:#9ca3af; font-size:10px; margin-right:4px;">${index+1}</span>${card}</span>
+            <span class="item-text"><span style="color:#9ca3af; font-size:10px; margin-right:4px;">${index + 1}</span>${card}</span>
             ${badge ? `<span class="label" style="font-weight:bold;">${badge}</span>` : ''}
           </li>
         `;
       });
+
       return html;
     }
 
     // バッジ生成関数
     function getDistanceBadge(idx, type, lastDrawnIdx) {
-      if (idx !== -1) return `<span class="badge-hit">${type}まで あと ${idx - lastDrawnIdx} 枚</span>`;
+      if (idx !== -1) {
+        return `<span class="badge-hit">${type}まで あと ${idx - lastDrawnIdx} 枚</span>`;
+      }
+
       return `<span class="badge-none">この先に当たりなし</span>`;
     }
 
@@ -250,6 +275,7 @@
 
       // 入力数の確認
       const inputCount = [l1, l2, r1, r2].filter(v => v.length > 0).length;
+
       if (inputCount < 2) {
         resultsDiv.innerHTML = '<p style="text-align: center; color: #64748b; font-size: 14px;">左右合わせて 2枚以上 選択すると検索されます。</p>';
         return;
@@ -260,18 +286,25 @@
 
       // 指定したシリンダー内でのマッチ箇所を探す関数
       function getMatches(list, i1, i2) {
-        if (!i1 && !i2) return [-1]; // 入力がない場合はスキップ用フラグ
+        if (!i1 && !i2) return [-1];
+
         let res = [];
+
         for (let i = 0; i < list.length; i++) {
-          let m1 = true, m2 = true;
+          let m1 = true;
+          let m2 = true;
+
           if (i1) {
             if (!list[i] || !normalize(list[i]).includes(i1)) m1 = false;
           }
+
           if (i2) {
-            if (i + 1 >= list.length || !list[i+1] || !normalize(list[i+1]).includes(i2)) m2 = false;
+            if (i + 1 >= list.length || !list[i + 1] || !normalize(list[i + 1]).includes(i2)) m2 = false;
           }
+
           if (m1 && m2) res.push(i);
         }
+
         return res;
       }
 
@@ -280,52 +313,61 @@
         const leftMatches = getMatches(pair.leftList, l1, l2);
         const rightMatches = getMatches(pair.rightList, r1, r2);
 
-        // 片方でも入力があるのにマッチしなかった場合は、このペアはハズレ
+        // 片方でも入力があるのにマッチしなかった場合は除外
         if ((l1 || l2) && leftMatches.length === 0) return;
         if ((r1 || r2) && rightMatches.length === 0) return;
 
         // 見つかった組み合わせをすべて表示
         leftMatches.forEach(lIdx => {
           rightMatches.forEach(rIdx => {
-            
+
             // 左右両方の位置が特定できている場合、ズレが10より大きければ除外
             if (lIdx !== -1 && rIdx !== -1) {
-              if (Math.abs(lIdx - rIdx) > 10) return; 
+              if (Math.abs(lIdx - rIdx) > 10) return;
             }
 
             matchCount++;
-            
+
             // 左側のターゲット計算
-            let lTargetIdx = -1, lTargetType = "";
+            let lTargetIdx = -1;
+            let lTargetType = "";
             let lLastIdx = lIdx !== -1 ? (l2 ? lIdx + 1 : lIdx) : -1;
+
             if (lIdx !== -1) {
               for (let j = lLastIdx + 1; j < pair.leftList.length; j++) {
                 if (isHit(pair.leftList[j])) {
-                  lTargetIdx = j; 
-                  lTargetType = getHitType(pair.leftList[j]); 
+                  lTargetIdx = j;
+                  lTargetType = getHitType(pair.leftList[j]);
                   break;
                 }
               }
             }
 
             // 右側のターゲット計算
-            let rTargetIdx = -1, rTargetType = "";
+            let rTargetIdx = -1;
+            let rTargetType = "";
             let rLastIdx = rIdx !== -1 ? (r2 ? rIdx + 1 : rIdx) : -1;
+
             if (rIdx !== -1) {
               for (let j = rLastIdx + 1; j < pair.rightList.length; j++) {
                 if (isHit(pair.rightList[j])) {
-                  rTargetIdx = j; 
-                  rTargetType = getHitType(pair.rightList[j]); 
+                  rTargetIdx = j;
+                  rTargetType = getHitType(pair.rightList[j]);
                   break;
                 }
               }
             }
 
-            const leftHtml = renderList(pair.leftList, lIdx, l2 ? lIdx+1 : -1, lTargetIdx);
-            const rightHtml = renderList(pair.rightList, rIdx, r2 ? rIdx+1 : -1, rTargetIdx);
+            const leftHtml = renderList(pair.leftList, lIdx, l2 ? lIdx + 1 : -1, lTargetIdx);
+            const rightHtml = renderList(pair.rightList, rIdx, r2 ? rIdx + 1 : -1, rTargetIdx);
 
-            const lBadge = lIdx !== -1 ? getDistanceBadge(lTargetIdx, lTargetType, lLastIdx) : '<span class="badge-none">選択なし（現在地不明）</span>';
-            const rBadge = rIdx !== -1 ? getDistanceBadge(rTargetIdx, rTargetType, rLastIdx) : '<span class="badge-none">選択なし（現在地不明）</span>';
+            const lBadge = lIdx !== -1
+              ? getDistanceBadge(lTargetIdx, lTargetType, lLastIdx)
+              : '<span class="badge-none">選択なし（現在地不明）</span>';
+
+            const rBadge = rIdx !== -1
+              ? getDistanceBadge(rTargetIdx, rTargetType, rLastIdx)
+              : '<span class="badge-none">選択なし（現在地不明）</span>';
 
             html += `
               <div class="result-card">
@@ -358,11 +400,21 @@
         resultsDiv.innerHTML = '<p style="text-align: center; color: #ef4444; font-weight: bold; background: #fef2f2; padding: 16px; border-radius: 8px;">その並びは見つかりませんでした。</p>';
       } else {
         resultsDiv.innerHTML = html;
-        // 自動スクロールは無効化済み
       }
     }
 
-    // ★イベントを input から change に変更 (セレクトボックス用)
+    // 弾数を切り替えたら、選択内容をリセットして対応データを読み込む
+    document.getElementById('seriesSelect').addEventListener('change', async function() {
+      currentSeries = this.value;
+
+      ['l1', 'l2', 'r1', 'r2'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+
+      await init();
+    });
+
+    // セレクトボックス変更時に検索
     ['l1', 'l2', 'r1', 'r2'].forEach(id => {
       document.getElementById(id).addEventListener('change', performSearch);
     });
